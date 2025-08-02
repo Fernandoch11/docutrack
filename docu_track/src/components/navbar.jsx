@@ -16,8 +16,20 @@ export default function Navbar() {
         );
     }
 
+    const token = localStorage.getItem('token');
+    if (!token) {
+        return (
+            <>
+                {setTimeout(() => {
+                    navigate('/');}
+                , 1)}
+            </>
+        );
+    }
+
     function logout() {
         localStorage.removeItem('token');
+        localStorage.removeItem('type');
         navigate('/');
     }
 

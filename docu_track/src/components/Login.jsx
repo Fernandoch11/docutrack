@@ -60,7 +60,7 @@ function Login(){
                       </div>
                       <button type="submit" className="btn btn-primary w-100">Iniciar Sesión</button>
                       <div className="mt-3 text-center">
-                        <a href="#">Registrate</a> | <a href="#">¿Olvidaste tu contraseña?</a>
+                        <Link to="/Register">Registrate</Link> | <a href="#">¿Olvidaste tu contraseña?</a>
                       </div>
                     </form>
                   </div>
