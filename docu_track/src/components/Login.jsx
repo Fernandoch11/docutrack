@@ -39,15 +39,23 @@ function Login(){
                       .then(response => response.json())
                       .then(data => {
 
+                        if(!data.error){
                         //guardar el token en localStorage
                         localStorage.setItem('token', data.access_token);
 
-                        const {user:{tipo_usuario}} = data;
+                        const {user:{tipo_usuario, id}} = data;
+
+                        localStorage.setItem('id', id);
+                        localStorage.setItem('type', tipo_usuario);
+
                         tipo_usuario === 'USER' ? navigate('/user') : navigate('/Admin');
+                        }else{
+                          alert("Usuario o contraseña incorrectos");
+                        }
                       }
                       )
                       .catch((error) => {
-                        console.error('Error:', error);
+
                       });
                     })}>
                       <div className="mb-3">

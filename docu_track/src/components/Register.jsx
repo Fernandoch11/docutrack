@@ -10,6 +10,7 @@ export default function Register() {
         <div className="maincontent">
           <div className="container vh-100 d-flex align-items-center justify-content-center">
               <div className="row w-100">
+                
                 <div className="col-md-3"></div>
                 <div className="col-md-6 d-flex flex-column align-items-center">
                   <div className="w-100" style={{maxWidth: "400px"}}>
@@ -68,12 +69,16 @@ export default function Register() {
                         <input type="password" className="form-control" id="pass" placeholder="Escribe la contraseña" {...register("pass", {required:true})} />
                       </div>
                       <button type="submit" className="btn btn-primary w-100">Registrate</button>
+
+                        <div className="mt-3 text-center">              
+                        <Link to="/">¿Regresar a Login?</Link>
+                  
+                        </div>
                       <div className="mt-3 text-center">
                       </div>
                     </form>
                   </div>
                 </div>
-                <div className="col-md-3"></div>
               </div>
             </div>
           </div>

@@ -12,7 +12,7 @@ const verifyToken = async (token) => {
       throw new Error('Token no válido');
     }
     const data = await response.json();
-    localStorage.setItem('type', data.tipo_usuario); // Guardar el token en localStorage
+    
     return data;
   }
   catch (error) {

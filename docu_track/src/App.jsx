@@ -1,7 +1,9 @@
 import './app.css'
 import Login from './components/login.jsx'
 import Admin from './components/Admin.jsx'
+import User from './components/User.jsx'
 import Register from './components/register.jsx'
+import New_Request from './components/New_Request.jsx'
 import { Route, BrowserRouter, Link, Routes } from 'react-router-dom'
 
 function App() {
@@ -10,11 +12,11 @@ function App() {
     <BrowserRouter>
     <Routes>
       <Route path="/" element={<Login />}/>
-      {/*<Route path="/user" element={<User />}/>*/}
+      <Route path="/User" element={<User />}/>
       <Route path="/Admin" element={<Admin />}/>
       <Route path="/Register" element={<Register />}/>
+      <Route path="/New_Request" element={<New_Request/>}/>
     </Routes>
-      
     </BrowserRouter>
   )
 }
