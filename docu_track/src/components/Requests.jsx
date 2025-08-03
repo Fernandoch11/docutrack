@@ -1,96 +1,137 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState,  useEffect } from 'react';
+import Navbar from './navbar';
+import verifyToken from './check_sesson';
+import { useNavigate } from 'react-router-dom';
 
 function Requests() {
+  
   const [datos, setDatos] = useState([]);
-  const [pagina, setPagina] = useState(1);
-  const [totalPaginas, setTotalPaginas] = useState(1);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState(null);
+  const [autorizado, setAutorizado] = useState(null); // null: cargando, false: no autorizado, true: autorizado
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchData = async () => {
+
+      const checkAuthAndFetchData = async () => {
+      const userType = localStorage.getItem('type');
+      const token = localStorage.getItem('token');
+
+      //verificamos usuario
+      if (userType !== 'USER' || !token) {
+        localStorage.removeItem('type');
+        localStorage.removeItem('token');
+        setAutorizado(false);
+        return;
+      }
+
+      //verificamos token
+      const isValid = await verifyToken(token);
+      if (!isValid) {
+        localStorage.removeItem('type');
+        localStorage.removeItem('token');
+        setAutorizado(false);
+        return;
+      }
+
+      setAutorizado(true);
+
+
       try {
-        setCargando(true);
-        const response = await fetch(
-          `https://api.ejemplo.com/datos?page=${pagina}&limit=10`
-        );
+
+        const formData = new FormData();
+        formData.append('userid', localStorage.getItem('id'));
+        //implementar paginacion
+        //formData.append('from', 0);
+        //formData.append('to', 20);
+
+        const response = await fetch("http://localhost:8000/api/auth/listrequests",{
+           method: "POST",
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData,
+        });
         
         if (!response.ok) {
           throw new Error(`Error HTTP: ${response.status}`);
         }
-        
-        const { data, totalPages } = await response.json();
-        setDatos(data);
-        setTotalPaginas(totalPages);
+
+        const { rows } = await response.json();
+        console.log(rows)
+        if(rows){
+          setDatos(rows);
+        }
       } catch (err) {
-        setError(err.message);
-      } finally {
-        setCargando(false);
+        err
       }
     };
 
-    fetchData();
-  }, [pagina]);
+  checkAuthAndFetchData();
+  }, []);
 
-  const handlePrevPage = () => {
-    if (pagina > 1) setPagina(pagina - 1);
-  };
+    if (autorizado === null) {
+     return <div className="container mt-5">Cargando...</div>;
+    }
 
-  const handleNextPage = () => {
-    if (pagina < totalPaginas) setPagina(pagina + 1);
-  };
+  if (autorizado === false) {
+        navigate('/');
+  }
 
-  if (cargando) return <div className="cargando">Cargando datos...</div>;
-  if (error) return <div className="error">Error: {error}</div>;
 
   return (
-    <div className="lista-container">
-      <h2>Lista de Elementos</h2>
-      
-      <table className="tabla-datos">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {datos.map((item) => (
-            <tr key={item.id}>
-              <td>{item.id}</td>
-              <td>{item.nombre}</td>
-              <td>{item.descripcion}</td>
-              <td>
-                <button onClick={() => console.log('Editar', item.id)}>
-                  Editar
-                </button>
-                <button onClick={() => console.log('Eliminar', item.id)}>
-                  Eliminar
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <>
+      <Navbar/>
+      <div className="maincontent1 vh-100">
+        <div className="container mt-5 d-flex">
+          <div className="row">
+            
+            <div className="col-md-2"></div>
+            <div className="col-md-8">
+              <h2 id="h2">Lista de Solicitudes</h2>
+              <div className="lista-container">
+                <table className="tabla-datos border">
+                  <thead>
+                    <tr id="trid">
+                      <th>ID</th>
+                      <th>Nombre</th>
+                      <th>Apellido</th>
+                      <th>Cedula</th>
+                      <th>Status</th>
+                      <th>Creado</th>
+                      <th>Progreso</th>
+                      <th>Certificado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {datos.map((item) => (
+                      <tr key={item.id}>
+                      <td>{item.id}</td>
+                      <td>{item.nombre}</td>
+                      <td>{item.apellido}</td>
+                      <td>{item.cedula}</td>
+                      <td>{item.status}</td>
+                      <td>{item.created_at}</td>
+                      <td>
+                            <span style={{fontSize:"12px"}}>{`${item.progress}%`}</span>
+                            <div className="skill-bar">
+                                
+                                <div className="skill-level" style={{width:`${item.progress}%`}}></div>
+                            </div>
+                      </td>
+                      <td>
+                        {parseInt(item.progress) === 100 ? <a href={`/Printer?nom=`+item.nombre+`&ap=`+item.apellido+`&ced=`+item.cedula+`&dt=`+item.emitido} target='_blank'>Descargar</a> : ""}
+                      </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-      <div className="paginacion">
-        <button 
-          onClick={handlePrevPage} 
-          disabled={pagina === 1}
-        >
-          Anterior
-        </button>
-        <span>Página {pagina} de {totalPaginas}</span>
-        <button 
-          onClick={handleNextPage} 
-          disabled={pagina === totalPaginas}
-        >
-          Siguiente
-        </button>
-      </div>
-    </div>
+            </div>
+            <div className="col-md-2"></div>
+          </div>
+        </div>
+      </div> 
+    </>
   );
 }
 

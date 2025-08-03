@@ -17,8 +17,6 @@ export default function Register() {
                     <h1 className="text-center">DocuTrack</h1>
                     <p className="text-center">Bienvenidos al Sistema de Seguimiento de Documentos. Por favor inicia sesión para continuar.</p>
                     <form onSubmit={handleSubmit((files) => {
-                      // Aquí puedes manejar el inicio de sesión, por ejemplo, enviando los datos a un servidor
-
                       fetch('http://localhost:8000/api/auth/register', {
                         method: 'POST',
                         headers: {

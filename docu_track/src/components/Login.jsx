@@ -15,8 +15,6 @@ function Login(){
                     <h1 className="text-center">DocuTrack</h1>
                     <p className="text-center">Bienvenidos al Sistema de Seguimiento de Documentos. Por favor inicia sesión para continuar.</p>
                     <form onSubmit={handleSubmit((files) => {
-                      // Aquí puedes manejar el inicio de sesión, por ejemplo, enviando los datos a un servidor
-
                       /*
                         Este es el formato de mi respuesta:
                         {
@@ -40,7 +38,6 @@ function Login(){
                       .then(data => {
 
                         if(!data.error){
-                        //guardar el token en localStorage
                         localStorage.setItem('token', data.access_token);
 
                         const {user:{tipo_usuario, id}} = data;
@@ -55,7 +52,7 @@ function Login(){
                       }
                       )
                       .catch((error) => {
-
+                        error
                       });
                     })}>
                       <div className="mb-3">
@@ -68,7 +65,7 @@ function Login(){
                       </div>
                       <button type="submit" className="btn btn-primary w-100">Iniciar Sesión</button>
                       <div className="mt-3 text-center">
-                        <Link to="/Register">Registrate</Link> | <a href="#">¿Olvidaste tu contraseña?</a>
+                        <Link to="/Register">Registrate</Link> | <Link to="#" title='No disponible'>¿Olvidaste tu contraseña?</Link>
                       </div>
                     </form>
                   </div>

@@ -1,32 +1,26 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import verifyToken from './check_sesson.js'
 import { Link, useNavigate } from 'react-router-dom'
 
 export default function Navbar() {
     const navigate = useNavigate();
     const [dropdownOpen, setDropdownOpen] = React.useState(false);
-    const data = verifyToken(localStorage.getItem('token'));
     
-    if(!data){
-        return (
-            <>
-                {setTimeout(() => {
-                    navigate('/');}
-                , 1)}
-            </>
-        );
-    }
+    useEffect(() => {
+        const checkAccess = async () => {
+            const token = localStorage.getItem('token');
 
-    const token = localStorage.getItem('token');
-    if (!token) {
-        return (
-            <>
-                {setTimeout(() => {
-                    navigate('/');}
-                , 1)}
-            </>
-        );
-    }
+            const isValid = await verifyToken(token);
+            if (!isValid) {
+                localStorage.removeItem('type');
+                localStorage.removeItem('token');
+                navigate('/');
+            }
+        };
+
+        checkAccess();
+    }, [navigate]);
+
 
     function logout() {
         localStorage.removeItem('token');
@@ -39,19 +33,35 @@ export default function Navbar() {
   return (
     userType === '"ADMIN"' ? (
       <>
-        <nav className="navbar navbar-expand-lg bg-body-tertiary">
+         <nav className="navbar navbar-expand-lg bg-body-tertiary">
             <div className="container-fluid">
-                <a className="navbar-brand" href="#">DocuTrack</a>
+                <Link to="/Admin" className="navbar-brand">DocuTrack</Link>
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
                 </button>
                 <div className="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li className="nav-item">
-                            <a className="nav-link active" aria-current="page" href="#">Home</a>
-                        </li>
-                        <li className="nav-item">
-                            <a className="nav-link" href="#">Link</a>
+                        <li
+                            className={`nav-item dropdown${dropdownOpen ? " show" : ""}`}
+                            onMouseEnter={() => setDropdownOpen(true)}
+                            onMouseLeave={() => setDropdownOpen(false)}
+                        >
+                            <a
+                                className="nav-link dropdown-toggle"
+                                href="#"
+                                id="navbarDropdown"
+                                role="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded={dropdownOpen ? "true" : "false"}
+                            >
+                                Usuarios
+                            </a>
+                            <ul
+                                className={`dropdown-menu${dropdownOpen ? " show" : ""}`}
+                                aria-labelledby="navbarDropdown"
+                            >
+                                <li><Link to="/New_User" className="dropdown-item">Nuevo usuario (admin)</Link></li>
+                            </ul>
                         </li>
                     </ul>
                 </div>

@@ -1,10 +1,35 @@
 import {useForm} from 'react-hook-form'
-import {Link} from 'react-router-dom'
+import {useNavigate} from 'react-router-dom'
 import Navbar from './navbar';
+import verifyToken from './check_sesson'
+import React, { useEffect } from 'react'
 
 export default function New_Request() {
-
+    const navigate = useNavigate();
     const { register, handleSubmit, reset } = useForm();
+
+   useEffect(() => {
+        const checkAccess = async () => {
+            const userType = localStorage.getItem('type');
+            const token = localStorage.getItem('token');
+
+            if (userType !== 'USER') {
+                localStorage.removeItem('type');
+                localStorage.removeItem('token');
+                navigate('/');
+                return;
+            }
+
+            const isValid = await verifyToken(token);
+            if (!isValid) {
+                localStorage.removeItem('type');
+                localStorage.removeItem('token');
+                navigate('/');
+            }
+        };
+
+        checkAccess();
+    }, [navigate]);
 
     const onSubmit = async (data) => {
     const formData = new FormData();

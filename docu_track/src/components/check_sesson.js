@@ -12,8 +12,11 @@ const verifyToken = async (token) => {
       throw new Error('Token no válido');
     }
     const data = await response.json();
-    
-    return data;
+    if(data.nombre){
+      return true;
+    }else{
+      return false;
+    }
   }
   catch (error) {
     console.error('Error al verificar el token:', error);
