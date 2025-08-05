@@ -5,6 +5,7 @@ import React, { useState,  useEffect } from 'react';
 
 
 export default function Admin() {
+    const [correcciones, setCorrecciones] = useState({});
     const [datos, setDatos] = useState([]);
     const [autorizado, setAutorizado] = useState(null); // null: cargando, false: no autorizado, true: autorizado
     const navigate = useNavigate();
@@ -71,16 +72,20 @@ export default function Admin() {
     }
 
 
-  const ChangeStatus = async (status, id) => {
+  const ChangeStatus = async (status, id, comentario = '') => {
     let newStatus = '';
 
-    if(status === 'Corregir'){
-        newStatus = 'Corregir'
+    if(status === 'Corregido'){
+        newStatus = 'En Validacion'
     }else{
-        if(status === 'Recibido'){
-            newStatus = 'En Validacion'
-        }else if(status === 'En Validacion'){
-            newStatus = 'Emitido'
+        if(status === 'Corregir'){
+            newStatus = status
+        }else{
+            if(status === 'Recibido'){
+                newStatus = 'En Validacion'
+            }else if(status === 'En Validacion'){
+                newStatus = 'Emitido'
+            }
         }
     }
 
@@ -88,7 +93,10 @@ export default function Admin() {
         const formData = new FormData();
         formData.append('id', id);
         formData.append('status', newStatus)
-        const resp = await fetch("http://localhost:8000/api/auth/updateStatus",{
+
+        if (comentario) formData.append('comment', comentario);
+
+        const resp = await fetch("http://localhost:8000/api/auth/updateStatusComment",{
             method:'POST',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -103,7 +111,7 @@ export default function Admin() {
         const { rows } = await resp.json();
         if(rows > 0){
             
-            //alert('Actualizado Correctamente')
+            setCorrecciones((prev) => ({ ...prev, [id]: '' }));
             await checkAuthAndFetchData();
             
         }
@@ -117,13 +125,14 @@ export default function Admin() {
     return (
       <>
         <Navbar/>
-        <div className="maincontent1 vh-100">
+        <div className="maincontent1" style={{width:'100%'}}>
           <div className="container mt-5 d-flex">
             <div className="row">
-              <div className="col-md-2"></div>
-              <div className="col-md-8">
+              
+              <div className="col-md-12">
                 <h2 id="h2">Solicitudes Pendientes</h2>
                 <div className="lista-container">
+
                   <table className="tabla-datos border">
                     <thead>
                       <tr id="trid">
@@ -135,7 +144,7 @@ export default function Admin() {
                         <th>Creado</th>
                         <th>Adjunto</th>
                         <th>Progreso</th>
-                        <th>Certificado</th>
+                        <th>Rechazar</th>
                         <th>Pasar a</th>
 
                       </tr>
@@ -158,21 +167,53 @@ export default function Admin() {
                               </div>
                         </td>
                         <td>
-                          {parseInt(item.progress) === 100 ? <a href={`/Printer?nom=`+item.nombre+`&ap=`+item.apellido+`&ced=`+item.cedula+`&dt=`+item.emitido} target='_blank'>Descargar</a> : ""}
-                        </td>
-                        <td><button className="btn btn-primary" style={{fontSize:"12px"}} onClick={() => ChangeStatus(item.status, item.id)}>{item.status === 'Recibido' || item.status === 'Corregido' ? 'Validación' : 'Emitido'}</button>
-                        <p></p>
-                        {item.status === 'En Validacion' ? <button className='btn btn-primary' style={{fontSize:"12px"}} onClick={() => ChangeStatus('Corregir', item.id)}>Corregir</button> : ''}
 
+                        </td>
+                        <td>
+                            {(item.status === 'Recibido' || item.status === 'Corregido') && (
+                                <button className="btn btn-primary btn-sm" onClick={() => ChangeStatus(item.status, item.id)}>
+                                    Validación
+                                </button>
+                            )}
+
+                            {item.status === 'En Validacion' && (
+                                <>
+                                    {/* Botón Corregir que activa el input */}
+                                    <button className="btn btn-warning btn-sm me-2 mt-1" onClick={() => setCorrecciones((prev) => ({
+                                        ...prev,
+                                        [item.id]: ''
+                                    }))}>
+                                    Corregir
+                                    </button>
+
+                                    {/* Input y botón de confirmación (solo si el id está activado) */}
+                                    {correcciones[item.id] !== undefined && (
+                                        <div className="mt-2">
+                                            <input type="text" className="form-control form-control-sm" placeholder="Motivo de corrección" value={correcciones[item.id]}
+                                            onChange={(e) =>
+                                                setCorrecciones((prev) => ({
+                                                ...prev,
+                                                [item.id]: e.target.value
+                                                }))}/>
+
+                                            <button className="btn btn-danger btn-sm mt-1" onClick={() => ChangeStatus('Corregir', item.id, correcciones[item.id])}> Enviar Corrección</button>
+                                        </div>
+                                    )}
+
+                                    {/* Botón para emitir directamente */}
+                                    <button className="btn btn-success btn-sm mt-2" onClick={() => ChangeStatus(item.status, item.id)}>Emitir</button>
+                                </>
+                          )}
                         </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
+
                 </div>
   
               </div>
-              <div className="col-md-2"></div>
+              
             </div>
           </div>
         </div> 

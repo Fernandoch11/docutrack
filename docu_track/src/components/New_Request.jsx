@@ -72,7 +72,7 @@ export default function New_Request() {
     <Navbar/>
       <div className="maincontent">
         <div className="container vh-100 d-flex align-items-center justify-content-center">
-<div className="row w-100">
+          <div className="row w-100">
                 
                 <div className="col-md-3"></div>
                 <div className="col-md-6 d-flex flex-column align-items-center">
@@ -106,7 +106,7 @@ export default function New_Request() {
                   </div>
                 </div>
               </div>
-        </div>
+          </div>
       </div>
     </>
   );

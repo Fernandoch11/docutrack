@@ -8,6 +8,7 @@ import New_Request from './components/New_Request.jsx'
 import Requests from './components/Requests.jsx'
 import Printer from './components/printer.jsx'
 import New_User from './components/New_User.jsx'
+import EditRequest from './components/EditRequest.jsx'
 
 function App() {
 
@@ -22,6 +23,7 @@ function App() {
       <Route path="/Requests" element={<Requests/>}/>
       <Route path="/Printer" element={<Printer/>}></Route>
       <Route path="/New_User" element={<New_User/>}></Route>
+      <Route path="/EditRequest" element={<EditRequest/>}></Route>
     </Routes>
     </BrowserRouter>
   )

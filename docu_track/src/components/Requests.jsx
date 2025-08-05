@@ -9,7 +9,6 @@ function Requests() {
   const [autorizado, setAutorizado] = useState(null); // null: cargando, false: no autorizado, true: autorizado
   const navigate = useNavigate();
 
-  useEffect(() => {
 
       const checkAuthAndFetchData = async () => {
       const userType = localStorage.getItem('type');
@@ -65,37 +64,82 @@ function Requests() {
       }
     };
 
-  checkAuthAndFetchData();
-  }, []);
+
+
+    useEffect(() => {
+      checkAuthAndFetchData();
+    }, []);
 
     if (autorizado === null) {
      return <div className="container mt-5">Cargando...</div>;
     }
 
-  if (autorizado === false) {
-        navigate('/');
+    if (autorizado === false) {
+          navigate('/');
+    }
+
+const ChangeStatus = async (status, id, redir = false) => {
+
+  if(redir){
+    window.location.href = '/EditRequest?id='+id
   }
 
+
+  let newStatus = ''
+  if(status === 'Corregir'){
+    newStatus = 'Corregido'
+  }
+
+  try {
+
+      const formData = new FormData();
+      formData.append('id', id);
+      formData.append('status', newStatus)
+
+      const resp = await fetch("http://localhost:8000/api/auth/updateStatus",{
+          method:'POST',
+          headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body:formData
+      });
+
+      if (!resp.ok) {
+        throw new Error(`Error HTTP: ${resp.status}`);
+      }
+
+      const { rows } = await resp.json();
+      if(rows > 0){
+        await checkAuthAndFetchData();
+      }
+
+  } catch (error) {
+    error
+  }
+}
+  
 
   return (
     <>
       <Navbar/>
-      <div className="maincontent1 vh-100">
+      <div className="maincontent1" style={{width:'100%'}}>
         <div className="container mt-5 d-flex">
           <div className="row">
             
-            <div className="col-md-2"></div>
-            <div className="col-md-8">
+            <div className="col-md-12">
               <h2 id="h2">Lista de Solicitudes</h2>
               <div className="lista-container">
+                
                 <table className="tabla-datos border">
                   <thead>
                     <tr id="trid">
+                      <th></th>
                       <th>ID</th>
                       <th>Nombre</th>
                       <th>Apellido</th>
                       <th>Cedula</th>
                       <th>Status</th>
+                      <th>Comentario</th>
                       <th>Creado</th>
                       <th>Progreso</th>
                       <th>Certificado</th>
@@ -104,11 +148,13 @@ function Requests() {
                   <tbody>
                     {datos.map((item) => (
                       <tr key={item.id}>
+                      <td>{item.status === 'Corregir' ? <button className='btn btn-primary' onClick={() =>{ChangeStatus(item.status, item.id, true)}}>Corregir</button> : ''}</td>
                       <td>{item.id}</td>
                       <td>{item.nombre}</td>
                       <td>{item.apellido}</td>
                       <td>{item.cedula}</td>
                       <td>{item.status}</td>
+                      <td>{item.comment}</td>
                       <td>{item.created_at}</td>
                       <td>
                             <span style={{fontSize:"12px"}}>{`${item.progress}%`}</span>
@@ -118,16 +164,17 @@ function Requests() {
                             </div>
                       </td>
                       <td>
-                        {parseInt(item.progress) === 100 ? <a href={`/Printer?nom=`+item.nombre+`&ap=`+item.apellido+`&ced=`+item.cedula+`&dt=`+item.emitido} target='_blank'>Descargar</a> : ""}
+                        {parseInt(item.progress) === 100 ? <a href={`/Printer?nom=`+item.nombre+`&ap=`+item.apellido+`&ced=`+item.cedula+`&dt=`+item.emitido} target='_blank' rel="noopener noreferrer">Descargar</a> : ""}
                       </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+               
               </div>
 
             </div>
-            <div className="col-md-2"></div>
+
           </div>
         </div>
       </div> 
